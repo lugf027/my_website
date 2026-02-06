@@ -5,9 +5,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import io.lugf027.github.mywebsite.utils.BrowserDom
 import io.lugf027.github.mywebsite.utils.JsInterop
-import kotlinx.browser.document
-import org.w3c.dom.HTMLDivElement
 
 /**
  * Markdown 渲染组件
@@ -27,8 +26,7 @@ fun MarkdownViewer(
     
     // 使用 DOM 元素显示 HTML
     DisposableEffect(htmlContent) {
-        val container = document.getElementById("markdown-container") as? HTMLDivElement
-        container?.innerHTML = htmlContent
+        BrowserDom.setInnerHtml("markdown-container", htmlContent)
         
         // 高亮代码块
         JsInterop.highlightCode()

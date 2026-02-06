@@ -44,11 +44,20 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
         }
         
-        jsMain.dependencies {
-            implementation(libs.ktor.clientJs)
+        // 创建 webMain 作为 JS 和 WasmJS 的共享源集
+        val webMain by creating {
+            dependsOn(commonMain.get())
+        }
+        
+        jsMain {
+            dependsOn(webMain)
+            dependencies {
+                implementation(libs.ktor.clientJs)
+            }
         }
         
         val wasmJsMain by getting {
+            dependsOn(webMain)
             dependencies {
                 implementation(libs.ktor.clientJs)
             }

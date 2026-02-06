@@ -1,56 +1,64 @@
 package io.lugf027.github.mywebsite.utils
 
-import kotlinx.browser.localStorage
-import org.w3c.dom.get
-import org.w3c.dom.set
-
 /**
  * 本地存储工具
+ * 使用内存存储，实际的浏览器 localStorage 将在平台特定代码中处理
  */
 object Storage {
     private const val TOKEN_KEY = "auth_token"
     private const val USER_KEY = "user_info"
     
+    // 使用内存存储作为后备
+    private val memoryStorage = mutableMapOf<String, String>()
+    
     /**
      * 保存 Token
      */
     fun saveToken(token: String) {
-        localStorage[TOKEN_KEY] = token
+        memoryStorage[TOKEN_KEY] = token
+        BrowserStorage.setItem(TOKEN_KEY, token)
     }
     
     /**
      * 获取 Token
      */
     fun getToken(): String? {
-        return localStorage[TOKEN_KEY]
+        return memoryStorage[TOKEN_KEY] ?: BrowserStorage.getItem(TOKEN_KEY)?.also {
+            memoryStorage[TOKEN_KEY] = it
+        }
     }
     
     /**
      * 清除 Token
      */
     fun clearToken() {
-        localStorage.removeItem(TOKEN_KEY)
+        memoryStorage.remove(TOKEN_KEY)
+        BrowserStorage.removeItem(TOKEN_KEY)
     }
     
     /**
      * 保存用户信息 JSON
      */
     fun saveUserJson(userJson: String) {
-        localStorage[USER_KEY] = userJson
+        memoryStorage[USER_KEY] = userJson
+        BrowserStorage.setItem(USER_KEY, userJson)
     }
     
     /**
      * 获取用户信息 JSON
      */
     fun getUserJson(): String? {
-        return localStorage[USER_KEY]
+        return memoryStorage[USER_KEY] ?: BrowserStorage.getItem(USER_KEY)?.also {
+            memoryStorage[USER_KEY] = it
+        }
     }
     
     /**
      * 清除用户信息
      */
     fun clearUser() {
-        localStorage.removeItem(USER_KEY)
+        memoryStorage.remove(USER_KEY)
+        BrowserStorage.removeItem(USER_KEY)
     }
     
     /**
@@ -67,4 +75,14 @@ object Storage {
     fun isLoggedIn(): Boolean {
         return getToken() != null
     }
+}
+
+/**
+ * 浏览器 localStorage 访问器
+ * 使用 expect/actual 或运行时检测
+ */
+expect object BrowserStorage {
+    fun setItem(key: String, value: String)
+    fun getItem(key: String): String?
+    fun removeItem(key: String)
 }

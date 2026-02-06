@@ -1,7 +1,7 @@
 package io.lugf027.github.mywebsite.navigation
 
 import androidx.compose.runtime.*
-import kotlinx.browser.window
+import io.lugf027.github.mywebsite.utils.BrowserWindow
 
 /**
  * 路由定义
@@ -23,21 +23,24 @@ sealed class Screen(val route: String) {
  * 导航控制器
  */
 class NavController {
-    var currentRoute by mutableStateOf(window.location.pathname)
+    var currentRoute by mutableStateOf(BrowserWindow.getPathname())
         private set
+    
+    private var popStateCallback: ((Any?) -> Unit)? = null
     
     init {
         // 监听浏览器历史变化
-        window.onpopstate = {
-            currentRoute = window.location.pathname
+        popStateCallback = {
+            currentRoute = BrowserWindow.getPathname()
         }
+        BrowserWindow.addPopStateListener(popStateCallback!!)
     }
     
     /**
      * 导航到指定路由
      */
     fun navigate(route: String) {
-        window.history.pushState(null, "", route)
+        BrowserWindow.pushState(route)
         currentRoute = route
     }
     
@@ -52,14 +55,14 @@ class NavController {
      * 返回上一页
      */
     fun goBack() {
-        window.history.back()
+        BrowserWindow.goBack()
     }
     
     /**
      * 替换当前路由（不添加历史记录）
      */
     fun replace(route: String) {
-        window.history.replaceState(null, "", route)
+        BrowserWindow.replaceState(route)
         currentRoute = route
     }
 }
