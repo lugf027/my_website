@@ -1,0 +1,17 @@
+# 本地开发配置模板
+# 复制此文件为 local.properties 并填写实际值
+# local.properties 已加入 .gitignore，不会被提交
+
+# 数据库配置
+DATABASE_URL=jdbc:mysql://localhost:3306/my_website?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+DATABASE_USER=root
+DATABASE_PASSWORD=your_password
+
+# JWT 配置 (生产环境请使用强密钥)
+JWT_SECRET=your-super-secret-jwt-key-change-in-production
+
+# 服务器端口 (可选，默认 8080)
+# PORT=8080
+
+# 数据库连接池大小 (可选，默认 10)
+# DATABASE_POOL_SIZE=10
