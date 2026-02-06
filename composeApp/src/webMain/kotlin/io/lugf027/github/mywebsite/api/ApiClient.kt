@@ -22,14 +22,16 @@ object ApiClient {
         encodeDefaults = true
     }
     
-    private val client = HttpClient {
+    @PublishedApi
+    internal val client = HttpClient {
         install(ContentNegotiation) {
             json(json)
         }
     }
     
     // API 基础 URL
-    var baseUrl: String = "http://localhost:8080"
+    @PublishedApi
+    internal var baseUrl: String = "http://localhost:8080"
     
     /**
      * GET 请求

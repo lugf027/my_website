@@ -4,7 +4,10 @@ import io.lugf027.github.mywebsite.common.Logger
 import io.lugf027.github.mywebsite.dto.BlogStatus
 import io.lugf027.github.mywebsite.model.entities.Blog
 import io.lugf027.github.mywebsite.model.tables.Blogs
+import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -48,7 +51,7 @@ class BlogRepository : Logger() {
      * 分页查询所有博客（后台管理）
      */
     fun findAll(page: Int, pageSize: Int, status: String? = null, keyword: String? = null): Pair<List<Blog>, Long> = transaction {
-        val baseCondition = when {
+        val baseCondition: Op<Boolean>? = when {
             status != null && keyword != null -> 
                 (Blogs.status eq status) and ((Blogs.title like "%$keyword%") or (Blogs.summary like "%$keyword%"))
             status != null -> Blogs.status eq status
