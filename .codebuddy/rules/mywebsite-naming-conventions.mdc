@@ -1,0 +1,97 @@
+---
+description: 
+alwaysApply: true
+enabled: true
+updatedAt: 2026-02-06T09:29:44.361Z
+provider: 
+---
+
+# MyWebsite 命名规范
+
+## 包和文件命名
+
+| 类型 | 规范 | 示例 |
+|------|------|------|
+| 包名 | 全小写，反向域名 | `io.lugf027.github.mywebsite` |
+| 源文件 | PascalCase | `BlogService.kt`, `UserRepository.kt` |
+
+## 类和接口命名
+
+| 类型 | 规范 | 示例 |
+|------|------|------|
+| 类名 | PascalCase | `BlogService`, `UserRepository` |
+| 接口 | PascalCase（无 I 前缀） | `UserDao`, `BlogService` |
+| object | PascalCase | `ApiClient`, `AppConfig` |
+| 数据类 | PascalCase + 语义后缀 | `BlogDetail`, `UserRequest` |
+
+## 后端特定命名
+
+| 组件 | 命名规范 | 示例 |
+|------|----------|------|
+| 表定义 | 复数 PascalCase | `object Users`, `object Blogs` |
+| 实体类 | 单数 PascalCase | `class User`, `class Blog` |
+| Repository | `XxxRepository` | `UserRepository`, `BlogRepository` |
+| Service | `XxxService` | `AuthService`, `BlogService` |
+| Routes | `XxxRoutes.kt` + `xxxRoutes()` 函数 | `BlogRoutes.kt`, `fun blogRoutes()` |
+
+## 前端特定命名
+
+| 组件 | 命名规范 | 示例 |
+|------|----------|------|
+| ViewModel | `XxxViewModel` | `BlogViewModel`, `AuthViewModel` |
+| 页面 | `XxxPage` | `BlogListPage`, `LoginPage` |
+| 组件 | PascalCase | `Header`, `Loading`, `MarkdownViewer` |
+| Screen | `Screen.Xxx` | `Screen.Home`, `Screen.BlogDetail(id)` |
+
+## 函数命名
+
+| 类型 | 规范 | 示例 |
+|------|------|------|
+| 普通函数 | camelCase | `getUserById()`, `createBlog()` |
+| Composable | PascalCase | `@Composable fun BlogCard()` |
+| 获取数据 | `get/find/load` | `getDetail()`, `findAll()`, `loadBlogs()` |
+| 创建数据 | `create` | `createUser()`, `createBlog()` |
+| 更新数据 | `update` | `updateBlog()`, `updateStatus()` |
+| 删除数据 | `delete` | `deleteUser()`, `deleteBlog()` |
+| 转换方法 | `toXxx` | `toDetail()`, `toListItem()` |
+
+## 变量和属性命名
+
+| 类型 | 规范 | 示例 |
+|------|------|------|
+| 变量 | camelCase | `userName`, `blogList` |
+| 常量 | UPPER_SNAKE_CASE | `DEFAULT_PAGE`, `MAX_SIZE` |
+| 布尔值 | `is/has/can` 前缀 | `isLoading`, `hasError`, `canEdit` |
+| 列表 | 复数或 `xxxList` | `blogs`, `userList` |
+| 状态 | 描述性名称 | `currentPage`, `errorMessage` |
+
+## 数据库字段命名
+
+| 类型 | 规范 | 示例 |
+|------|------|------|
+| 列名 | snake_case | `user_name`, `created_at` |
+| 主键 | `id` | `id` |
+| 外键 | `xxx_id` | `user_id`, `author_id` |
+| 时间戳 | `xxx_at` | `created_at`, `updated_at` |
+| 状态 | `status` | `status` (值: "draft", "published") |
+| 计数 | `xxx_count` | `view_count`, `like_count` |
+
+## API 路径命名
+
+| 类型 | 规范 | 示例 |
+|------|------|------|
+| 基础路径 | `/api/v1` | `/api/v1/blogs` |
+| 资源 | 复数小写 | `/blogs`, `/users` |
+| 详情 | `/{id}` | `/blogs/123` |
+| 操作 | 动词 | `/blogs/123/publish` |
+| 管理 | `/admin/xxx` | `/admin/blogs` |
+
+## DTO 命名
+
+| 用途 | 后缀 | 示例 |
+|------|------|------|
+| 完整详情 | `Detail` | `BlogDetail`, `UserDetail` |
+| 列表项 | `ListItem` | `BlogListItem` |
+| 简要信息 | `Brief` | `UserBrief` |
+| 请求体 | `Request` | `LoginRequest`, `BlogRequest` |
+| 分页数据 | `PageData<T>` | `PageData<BlogListItem>` |

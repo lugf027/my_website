@@ -1,0 +1,239 @@
+---
+description: 共享 DTO 开发指南 - 当需要在 shared 模块添加新的 DTO 或 API 路由定义时使用
+alwaysApply: false
+enabled: true
+updatedAt: 2026-02-06T09:29:27.635Z
+provider: 
+---
+
+# MyWebsite 共享模块开发指南
+
+## 模块说明
+
+`shared` 模块包含前后端共享的代码，主要是 DTO（数据传输对象）和 API 路由定义。
+
+## 目录结构
+
+```
+shared/src/commonMain/kotlin/io/lugf027/github/mywebsite/
+├── dto/                      # 数据传输对象
+│   ├── ApiResponse.kt       # 统一响应格式
+│   ├── UserDto.kt           # 用户相关 DTO
+│   ├── BlogDto.kt           # 博客相关 DTO
+│   ├── SiteConfigDto.kt     # 站点配置 DTO
+│   └── StatisticsDto.kt     # 统计数据 DTO
+├── api/
+│   └── ApiRoutes.kt         # API 路由定义
+└── Constants.kt             # 常量定义
+```
+
+---
+
+## 代码模板
+
+### 1. 统一响应格式
+
+```kotlin
+// dto/ApiResponse.kt（已存在）
+@Serializable
+data class ApiResponse<T>(
+    val code: Int = 0,          // 0 = 成功，其他 = 错误码
+    val message: String = "success",
+    val data: T? = null
+) {
+    fun isSuccess(): Boolean = code == 0
+}
+
+@Serializable
+data class PageData<T>(
+    val items: List<T>,
+    val total: Long,
+    val page: Int,
+    val pageSize: Int,
+    val totalPages: Int
+)
+```
+
+### 2. DTO 定义
+
+```kotlin
+// dto/ExampleDto.kt
+package io.lugf027.github.mywebsite.dto
+
+import kotlinx.serialization.Serializable
+
+/**
+ * 示例详情
+ */
+@Serializable
+data class ExampleDetail(
+    val id: Long,
+    val name: String,
+    val description: String? = null,
+    val status: String,
+    val createdAt: String,
+    val updatedAt: String
+)
+
+/**
+ * 示例列表项（精简版，用于列表展示）
+ */
+@Serializable
+data class ExampleListItem(
+    val id: Long,
+    val name: String,
+    val status: String,
+    val createdAt: String
+)
+
+/**
+ * 创建/更新请求
+ */
+@Serializable
+data class ExampleRequest(
+    val name: String,
+    val description: String? = null
+)
+
+/**
+ * 状态更新请求
+ */
+@Serializable
+data class ExampleStatusRequest(
+    val status: String
+)
+```
+
+### 3. API 路由定义
+
+```kotlin
+// api/ApiRoutes.kt
+package io.lugf027.github.mywebsite.api
+
+/**
+ * API 路由定义（前后端共享）
+ */
+object ApiRoutes {
+    private const val BASE_URL = "/api/v1"
+    
+    // ... 其他已有路由
+    
+    /**
+     * 示例相关路由
+     */
+    object Example {
+        const val BASE = "$BASE_URL/examples"
+        
+        fun detail(id: Long) = "$BASE/$id"
+    }
+    
+    /**
+     * 后台管理 - 示例
+     */
+    object Admin {
+        private const val ADMIN_BASE = "$BASE_URL/admin"
+        
+        // ... 其他已有路由
+        
+        object Example {
+            const val BASE = "$ADMIN_BASE/examples"
+            
+            fun detail(id: Long) = "$BASE/$id"
+            fun updateStatus(id: Long) = "$BASE/$id/status"
+        }
+    }
+}
+```
+
+---
+
+## DTO 设计原则
+
+### 1. 区分详情和列表
+
+```kotlin
+// 详情 DTO - 包含完整信息
+data class BlogDetail(
+    val id: Long,
+    val title: String,
+    val content: String,         // 完整内容
+    val summary: String?,
+    val tags: List<String>,      // 完整标签列表
+    val author: UserBrief,       // 关联对象
+    val viewCount: Int,
+    val createdAt: String,
+    val updatedAt: String,
+    val publishedAt: String?
+)
+
+// 列表项 DTO - 精简信息
+data class BlogListItem(
+    val id: Long,
+    val title: String,
+    val summary: String?,        // 只有摘要，无完整内容
+    val authorName: String,      // 只有名字，无关联对象
+    val viewCount: Int,
+    val publishedAt: String?
+)
+```
+
+### 2. Request 和 Response 分离
+
+```kotlin
+// Request - 用于创建/更新
+data class BlogRequest(
+    val title: String,
+    val content: String,
+    val summary: String?,
+    val tags: List<String>
+)
+
+// Response - 用于返回（通常复用 Detail）
+// 可以直接使用 BlogDetail
+```
+
+### 3. 嵌套对象使用 Brief 版本
+
+```kotlin
+// 完整用户信息
+data class UserDetail(
+    val id: Long,
+    val username: String,
+    val email: String,
+    val avatar: String?,
+    val bio: String?,
+    val createdAt: String
+)
+
+// 简要用户信息（用于嵌套）
+data class UserBrief(
+    val id: Long,
+    val username: String,
+    val avatar: String?
+)
+```
+
+---
+
+## 命名规范
+
+| 类型 | 后缀 | 示例 |
+|------|------|------|
+| 详情 | `Detail` | `BlogDetail`, `UserDetail` |
+| 列表项 | `ListItem` | `BlogListItem`, `UserListItem` |
+| 简要 | `Brief` | `UserBrief`, `AuthorBrief` |
+| 请求 | `Request` | `BlogRequest`, `LoginRequest` |
+| 统计 | `Stats` / `Statistics` | `VisitStats`, `BlogStatistics` |
+
+---
+
+## 注意事项
+
+1. **必须使用 `@Serializable`**: 所有 DTO 必须添加此注解
+2. **使用原始类型**: 时间用 `String`（ISO 格式），避免平台差异
+3. **可空字段**: 使用 `?` 标记，并提供默认值 `= null`
+4. **不可变性**: 使用 `val` 而非 `var`
+5. **同步更新**: 添加新 DTO 后，需要同时更新：
+   - 后端 Entity 的转换方法
+   - 前端 ViewModel 的类型引用
+   - API 路由定义

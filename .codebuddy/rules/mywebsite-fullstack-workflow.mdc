@@ -1,0 +1,200 @@
+---
+description: 全栈功能开发流程 - 当需要开发一个完整的新功能（涉及前后端）时使用
+alwaysApply: false
+enabled: true
+updatedAt: 2026-02-06T09:30:16.833Z
+provider: 
+---
+
+# MyWebsite 全栈功能开发流程
+
+当需要开发一个完整的新功能时（如"评论系统"、"标签管理"），按以下顺序进行：
+
+## 开发流程
+
+```
+1. 设计 DTO (shared) 
+   ↓
+2. 定义 API 路由 (shared)
+   ↓
+3. 创建数据库表 (server/model/tables)
+   ↓
+4. 创建实体类 (server/model/entities)
+   ↓
+5. 实现 Repository (server/repository)
+   ↓
+6. 实现 Service (server/service)
+   ↓
+7. 实现 Routes (server/routes)
+   ↓
+8. 注册路由 (server/plugins/Routing.kt)
+   ↓
+9. 创建 ViewModel (composeApp/viewmodel)
+   ↓
+10. 创建 UI 页面 (composeApp/ui)
+    ↓
+11. 注册前端路由 (composeApp/navigation/NavHost.kt)
+```
+
+## 示例：添加"评论"功能
+
+### Step 1: 设计 DTO (shared)
+
+```kotlin
+// shared/src/commonMain/kotlin/.../dto/CommentDto.kt
+@Serializable
+data class CommentDetail(
+    val id: Long,
+    val blogId: Long,
+    val content: String,
+    val author: UserBrief,
+    val createdAt: String
+)
+
+@Serializable
+data class CommentRequest(
+    val blogId: Long,
+    val content: String
+)
+```
+
+### Step 2: 定义 API 路由 (shared)
+
+```kotlin
+// 在 ApiRoutes.kt 中添加
+object Comment {
+    const val BASE = "$BASE_URL/comments"
+    fun byBlog(blogId: Long) = "$BASE/blog/$blogId"
+}
+
+object Admin {
+    object Comments {
+        const val BASE = "$ADMIN_BASE/comments"
+        fun detail(id: Long) = "$BASE/$id"
+    }
+}
+```
+
+### Step 3-4: 创建数据库表和实体 (server)
+
+```kotlin
+// model/tables/Comments.kt
+object Comments : LongIdTable("comments") {
+    val blogId = long("blog_id").references(Blogs.id)
+    val userId = long("user_id").references(Users.id)
+    val content = text("content")
+    val createdAt = datetime("created_at").default(LocalDateTime.now())
+}
+
+// model/entities/Comment.kt
+class Comment(id: EntityID<Long>) : LongEntity(id) {
+    companion object : LongEntityClass<Comment>(Comments)
+    // ... 属性和转换方法
+}
+```
+
+### Step 5-7: 实现后端三层 (server)
+
+```kotlin
+// repository/CommentRepository.kt
+object CommentRepository : Logger() {
+    fun findByBlogId(blogId: Long, page: Int, pageSize: Int): Pair<List<Comment>, Long>
+    fun create(blogId: Long, userId: Long, content: String): Comment
+    fun delete(id: Long): Boolean
+}
+
+// service/CommentService.kt
+object CommentService : Logger() {
+    fun getByBlog(blogId: Long, page: Int, pageSize: Int): PageData<CommentDetail>
+    fun create(request: CommentRequest, userId: Long): CommentDetail
+    fun delete(id: Long, userId: Long)
+}
+
+// routes/CommentRoutes.kt
+fun Route.commentRoutes() { /* 公开接口 */ }
+fun Route.commentAdminRoutes() { /* 管理接口 */ }
+```
+
+### Step 8: 注册路由 (server)
+
+```kotlin
+// plugins/Routing.kt
+fun Application.configureRouting() {
+    routing {
+        // ... 其他路由
+        commentRoutes()
+        commentAdminRoutes()
+    }
+}
+```
+
+### Step 9-10: 创建前端 ViewModel 和页面
+
+```kotlin
+// viewmodel/CommentViewModel.kt
+class CommentViewModel {
+    var comments by mutableStateOf<List<CommentDetail>>(emptyList())
+    fun loadComments(blogId: Long)
+    fun addComment(request: CommentRequest, onSuccess: () -> Unit)
+}
+
+// ui/blog/CommentSection.kt (嵌入博客详情页)
+@Composable
+fun CommentSection(blogId: Long, viewModel: CommentViewModel)
+```
+
+### Step 11: 注册前端路由（如需独立页面）
+
+```kotlin
+// navigation/NavHost.kt
+sealed class Screen {
+    // ... 如果评论有独立页面
+    data class CommentManage(val blogId: Long) : Screen("/admin/comments/$blogId")
+}
+```
+
+---
+
+## 检查清单
+
+添加新功能时，确保完成以下步骤：
+
+- [ ] **shared 模块**
+  - [ ] 创建 DTO 文件 (`dto/XxxDto.kt`)
+  - [ ] 添加 API 路由定义 (`api/ApiRoutes.kt`)
+
+- [ ] **server 模块**
+  - [ ] 创建表定义 (`model/tables/Xxx.kt`)
+  - [ ] 创建实体类 (`model/entities/Xxx.kt`)
+  - [ ] 实现 Repository (`repository/XxxRepository.kt`)
+  - [ ] 实现 Service (`service/XxxService.kt`)
+  - [ ] 实现 Routes (`routes/XxxRoutes.kt`)
+  - [ ] 注册路由 (`plugins/Routing.kt`)
+  - [ ] 编译验证 (`./gradlew :server:compileKotlin`)
+
+- [ ] **composeApp 模块**
+  - [ ] 创建 ViewModel (`viewmodel/XxxViewModel.kt`)
+  - [ ] 创建 UI 页面/组件 (`ui/xxx/XxxPage.kt`)
+  - [ ] 注册路由 (如需要, `navigation/NavHost.kt`)
+  - [ ] 编译验证 (`./gradlew :composeApp:compileKotlinWasmJs`)
+
+---
+
+## 常用命令
+
+```bash
+# 编译后端
+./gradlew :server:compileKotlin
+
+# 编译前端
+./gradlew :composeApp:compileKotlinWasmJs :composeApp:compileKotlinJs
+
+# 完整构建（跳过测试）
+./gradlew build -x test -x jsBrowserTest -x wasmJsBrowserTest
+
+# 运行后端
+./gradlew :server:run
+
+# 运行前端开发服务器
+./gradlew :composeApp:wasmJsBrowserDevelopmentRun
+```
