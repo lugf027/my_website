@@ -1,20 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mywebsite</title>
+    <title>My Website</title>
+    
+    <!-- 预加载字体文件 -->
+    <link rel="preload" 
+          href="./composeResources/mywebsite.composeapp.generated.resources/font/NotoSansSC_Regular.ttf" 
+          as="fetch" 
+          type="font/ttf" 
+          crossorigin/>
+    
     <link type="text/css" rel="stylesheet" href="styles.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+    </style>
 </head>
-<body style="text-align: center; align-content: center">
-<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 50 50" role="presentation">
-    <circle cx="25" cy="25" r="20" stroke="#ccc" stroke-width="4" fill="none"/>
-    <circle cx="25" cy="25" r="20" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"
-            stroke-dasharray="90 125">
-        <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s"
-                          repeatCount="indefinite"/>
-    </circle>
-</svg>
+<body>
+<!-- 加载动画 -->
+<div id="loading" style="text-align: center; padding-top: 100px;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 50 50" role="presentation">
+        <circle cx="25" cy="25" r="20" stroke="#ccc" stroke-width="4" fill="none"/>
+        <circle cx="25" cy="25" r="20" stroke="#2563EB" stroke-width="4" fill="none" stroke-linecap="round"
+                stroke-dasharray="90 125">
+            <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s"
+                              repeatCount="indefinite"/>
+        </circle>
+    </svg>
+    <p style="color: #666; margin-top: 16px; font-size: 14px;">加载中...</p>
+</div>
 <script type="application/javascript" src="composeApp.js"></script>
+<script>
+    // 页面加载完成后隐藏 loading
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            var loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'none';
+            }
+        }, 500);
+    });
+</script>
 </body>
 </html>
