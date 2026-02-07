@@ -72,7 +72,7 @@ fun HomePage(
             // Footer
             Footer(
                 icpRecord = viewModel.siteOverview?.icpRecord ?: "",
-                copyright = "© 2024 ${viewModel.siteOverview?.ownerName ?: "MyWebsite"}. All rights reserved."
+                copyright = "© 2026 ${viewModel.siteOverview?.ownerName ?: "MyWebsite"}. All rights reserved."
             )
         }
     }

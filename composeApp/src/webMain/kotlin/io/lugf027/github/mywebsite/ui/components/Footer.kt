@@ -17,7 +17,7 @@ import io.lugf027.github.mywebsite.ui.theme.AppColors
 @Composable
 fun Footer(
     icpRecord: String = "",
-    copyright: String = "© 2024 MyWebsite. All rights reserved."
+    copyright: String = "© 2026 MyWebsite. All rights reserved."
 ) {
     Column(
         modifier = Modifier
